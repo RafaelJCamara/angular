@@ -526,7 +526,7 @@ export enum ErrorCode {
    * <p> {{ firstName }} </p>
    * ```
    *
-   * This will not call `firstName`. Instead, it should be:
+   * The `firstName` function is not invoked. Instead, it should be:
    * ```html
    * <p> {{ firstName() }} </p>
    * ```
