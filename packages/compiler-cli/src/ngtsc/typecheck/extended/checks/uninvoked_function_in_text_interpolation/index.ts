@@ -1,7 +1,15 @@
-import ts, { ClassDeclaration } from 'typescript';
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.dev/license
+ */
+
+import ts from 'typescript';
 import {ErrorCode, ExtendedTemplateDiagnosticName} from '../../../../diagnostics';
-import { NgTemplateDiagnostic, SymbolKind } from '../../../api';
-import { TemplateCheckFactory, TemplateCheckWithVisitor, TemplateContext } from '../../api';
+import {NgTemplateDiagnostic, SymbolKind} from '../../../api';
+import {TemplateCheckFactory, TemplateCheckWithVisitor, TemplateContext} from '../../api';
 import {
   AST,
   Call,
@@ -12,15 +20,21 @@ import {
   TmplAstNode,
 } from '@angular/compiler';
 
-class UninvokedFunctionInTextInterpolation extends TemplateCheckWithVisitor<ErrorCode.UNINVOKED_FUNCTION_IN_TEXT_INTERPOLATION>{
+class UninvokedFunctionInTextInterpolation extends TemplateCheckWithVisitor<ErrorCode.UNINVOKED_FUNCTION_IN_TEXT_INTERPOLATION> {
   override code = ErrorCode.UNINVOKED_FUNCTION_IN_TEXT_INTERPOLATION as const;
 
-  override visitNode(ctx: TemplateContext<ErrorCode.UNINVOKED_FUNCTION_IN_TEXT_INTERPOLATION>, component: ClassDeclaration, node: TmplAstNode | AST): NgTemplateDiagnostic<ErrorCode.UNINVOKED_FUNCTION_IN_TEXT_INTERPOLATION>[] {
+  override visitNode(
+    ctx: TemplateContext<ErrorCode.UNINVOKED_FUNCTION_IN_TEXT_INTERPOLATION>,
+    component: ts.ClassDeclaration,
+    node: TmplAstNode | AST,
+  ): NgTemplateDiagnostic<ErrorCode.UNINVOKED_FUNCTION_IN_TEXT_INTERPOLATION>[] {
     // interpolations like `{{ myFunction }}`
     if (node instanceof Interpolation) {
       return node.expressions
         .filter((item): item is PropertyRead => item instanceof PropertyRead)
-        .flatMap((item) => assertExpressionInvoked(item, component, node.sourceSpan.toString(), ctx));
+        .flatMap((item) =>
+          assertExpressionInvoked(item, component, node.sourceSpan.toString(), ctx),
+        );
     }
     return [];
   }
