@@ -117,5 +117,36 @@ runInEachFileSystem(() => {
       const diags = extendedTemplateChecker.getDiagnosticsForComponent(component);
       expect(diags.length).toBe(0);
     });
+
+    it('should produce a warning when a property method is not invoked in text interpolation', () => {
+      const fileName = absoluteFrom('/main.ts');
+
+      const {program, templateTypeChecker} = setup([
+        {
+          fileName,
+          templates: {
+            'TestCmp': `<p> {{ myObj.firstName }} </p>`,
+          },
+          source: `
+          export class TestCmp {
+            myObj = { firstName: () => "Morgan" };
+          }`,
+        },
+      ]);
+      const sf = getSourceFileOrError(program, fileName);
+      const component = getClass(sf, 'TestCmp');
+      const extendedTemplateChecker = new ExtendedTemplateCheckerImpl(
+        templateTypeChecker,
+        program.getTypeChecker(),
+        [uninvokedFunctionInTextInterpolationFactory],
+        {},
+        /* options */
+      );
+      const diags = extendedTemplateChecker.getDiagnosticsForComponent(component);
+      expect(diags.length).toBe(1);
+      expect(diags[0].category).toBe(ts.DiagnosticCategory.Warning);
+      expect(diags[0].code).toBe(ngErrorCode(ErrorCode.UNINVOKED_FUNCTION_IN_TEXT_INTERPOLATION));
+      expect(getSourceCodeForDiagnostic(diags[0])).toBe('firstName');
+    });
   });
 });
