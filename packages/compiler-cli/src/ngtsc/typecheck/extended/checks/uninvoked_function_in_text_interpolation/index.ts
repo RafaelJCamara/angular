@@ -31,10 +31,9 @@ class UninvokedFunctionInTextInterpolation extends TemplateCheckWithVisitor<Erro
   ): NgTemplateDiagnostic<ErrorCode.UNINVOKED_FUNCTION_IN_TEXT_INTERPOLATION>[] {
     // interpolations like `{{ myFunction }}`
     if (node instanceof Interpolation) {
-      return node.expressions
-        .flatMap((item) =>
-          assertExpressionInvoked(item, component, node.sourceSpan, ctx),
-        );
+      return node.expressions.flatMap((item) =>
+        assertExpressionInvoked(item, component, node.sourceSpan, ctx),
+      );
     }
     return [];
   }
@@ -46,10 +45,6 @@ function assertExpressionInvoked(
   sourceSpan: AbsoluteSourceSpan,
   ctx: TemplateContext<ErrorCode.UNINVOKED_FUNCTION_IN_TEXT_INTERPOLATION>,
 ): NgTemplateDiagnostic<ErrorCode.UNINVOKED_FUNCTION_IN_TEXT_INTERPOLATION>[] {
-  if (expression instanceof Call || expression instanceof SafeCall) {
-    return []; // If the method is called, skip it.
-  }
-
   if (!(expression instanceof PropertyRead) && !(expression instanceof SafePropertyRead)) {
     return []; // If the expression is not a property read, skip it.
   }
